@@ -135,6 +135,19 @@ Architecture* de Tom Hombergs), que tampoco repite el nombre del agregado en
          que el mapper le asigne el UUID — el adapter decide la intención
          (crear vs. actualizar), no una heurística basada en si el campo es
          null en el objeto ya construido.
+    - **(2026-09-13) Operadores de error de Reactor — cuáles se usan y por qué:**
+      `AppointmentPersistenceAdapter.save()` agrega `.doOnError(...)` (loggea
+      con `@Slf4j` sin alterar el flujo) + `.onErrorMap(DataAccessException.class,
+      ex -> new AppointmentPersistenceException(...))` (traduce una excepción
+      técnica de R2DBC/Spring Data a una propia, agnóstica de tecnología,
+      definida en `application/port/out` — no en `domain`, porque no es un
+      hecho de negocio, es una falla de infraestructura). Mapeada a `503` en
+      `AppointmentExceptionHandler` sin filtrar el mensaje interno al cliente.
+      `retryWhen(Retry.backoff(...))` y `onErrorResume` **no se usan** en este
+      proyecto — no hay ninguna llamada a un servicio externo (`WebClient`)
+      todavía; forzarlos sin un caso real sería ceremonia vacía. Si `salud`
+      alguna vez llamara a un servicio externo (ej. verificación de seguro
+      médico), ahí es donde irían.
     - `adapter/in/web/AppointmentController` (`@RestController`,
       `/appointments`) expone los 8 casos de uso vía HTTP, con DTOs propios
       (`RequestAppointmentRequest`, `RescheduleAppointmentRequest`,
@@ -212,6 +225,52 @@ Architecture* de Tom Hombergs), que tampoco repite el nombre del agregado en
     separados explícitamente en `port/in`/`port/out` como en `salud` — esa
     separación es justamente lo que habría que portear desde `salud` cuando
     corresponda.
+
+## Testing (implementado 2026-09-13) — pirámide completa, 18 tests, todos en verde
+
+- **Dominio** (`AppointmentTest`, JUnit puro, sin mocks, sin Spring): cada
+  transición (`confirm`/`start`/`complete`/`cancel`/`reschedule`/`markNoShow`)
+  + sus guard clauses (`InvalidAppointmentTransitionException` en transición
+  inválida) + el ciclo de vida feliz completo.
+- **`application/service`** (Mockito + `StepVerifier`, mockeando los
+  `port/out`): `RequestAppointmentServiceTest` (crea + verifica lo que se le
+  pasó a `save` con `ArgumentCaptor`), `ConfirmAppointmentServiceTest` (caso
+  feliz + `AppointmentNotFoundException` cuando `loadById` devuelve
+  `Mono.empty()`), `FindAppointmentServiceTest` (confirma que un vacío es un
+  resultado válido a este nivel, no un error).
+- **`adapter/in/web`** (`@WebFluxTest(AppointmentController.class)` +
+  `WebTestClient`, mockeando los `port/in` con `@MockitoBean`): verifica que
+  un `Mono.empty()` del use case se traduce a `404` (el hallazgo de la vuelta
+  anterior, ahora cubierto por test automatizado), que un body válido
+  devuelve `200`, y que `@Valid` rechaza un `patientId` faltante con `400`.
+- **End-to-end** (`AppointmentEndToEndTest`, `@SpringBootTest(webEnvironment
+  = RANDOM_PORT)` + `@AutoConfigureWebTestClient` + `WebTestClient`): repite
+  en CI el flujo completo que se venía probando a mano con `curl`, contra la
+  BD H2 real (crear → confirmar → iniciar → completar → intentar cancelar ya
+  completada → 4xx → 404 real en un id inexistente).
+
+**Lecciones reales de compatibilidad Spring Boot 4 / Jackson 3 encontradas al
+escribir estos tests** (no en teoría — el compilador y los tests fallaron
+hasta corregir cada una):
+- `@WebFluxTest` se movió de paquete: ya no es
+  `org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest`,
+  ahora es `org.springframework.boot.webflux.test.autoconfigure.WebFluxTest`
+  (Spring Boot 4 modularizó los slices de test en artefactos separados, ej.
+  `spring-boot-webflux-test`, en vez de un único `spring-boot-test-autoconfigure`
+  monolítico).
+- `@MockBean` (`org.springframework.boot.test.mock.mockito.MockBean`) ya no
+  existe — reemplazado por `@MockitoBean`
+  (`org.springframework.test.context.bean.override.mockito.MockitoBean`).
+- `@AutoConfigureWebTestClient` vive en
+  `org.springframework.boot.webtestclient.autoconfigure` (artefacto
+  `spring-boot-webtestclient`) — necesario explícitamente para tener un bean
+  `WebTestClient` cuando el test usa `webEnvironment = RANDOM_PORT` (con
+  `MOCK` se auto-configura solo).
+- **Jackson 3**: Spring Boot 4 migró de `com.fasterxml.jackson.*` a
+  `tools.jackson.*` — `JsonNode` en un test debe importarse desde
+  `tools.jackson.databind.JsonNode`, y `asText()` está deprecado en favor de
+  `asString()`. Cualquier tutorial/ejemplo viejo que use `com.fasterxml.jackson`
+  en un proyecto Spring Boot 4 va a fallar en compilación, no en runtime.
 
 ## Contrato reactivo (obligatorio, Spring WebFlux)
 

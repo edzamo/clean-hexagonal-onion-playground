@@ -1,5 +1,6 @@
 package com.example.hexagonal.architecture.salud.infrastructure.adapter.in.web;
 
+import com.example.hexagonal.architecture.salud.application.port.out.AppointmentPersistenceException;
 import com.example.hexagonal.architecture.salud.domain.appointment.AppointmentNotFoundException;
 import com.example.hexagonal.architecture.salud.domain.appointment.InvalidAppointmentTransitionException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,11 @@ public class AppointmentExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleInvalidInput(IllegalArgumentException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(AppointmentPersistenceException.class)
+    public ProblemDetail handlePersistenceFailure(AppointmentPersistenceException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, "Appointment storage is temporarily unavailable");
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
