@@ -72,9 +72,39 @@ bounded context tiene un solo agregado hoy. `domain` sí lo mantiene
   (`PlaceOrderRequest`+`LineItemRequest` con `@Valid`, `OrderResponse`),
   `GlobalExceptionHandler` (`ProblemDetail`: `OrderNotFoundException`→404,
   `InvalidOrderTransitionException`→409, `IllegalArgumentException`/
-  `WebExchangeBindException`→400), `InMemoryOrderPersistenceAdapter`,
-  `OpenApiConfig` (springdoc, Swagger UI en `/swagger-ui.html`).
+  `WebExchangeBindException`→400), `OpenApiConfig` (springdoc, Swagger UI en
+  `/swagger-ui.html`).
 - **`application.yml`** reemplaza `application.properties`.
+
+### Persistencia real (2026-09-13) — misma decisión que `salud`
+
+`InMemoryOrderPersistenceAdapter` reemplazado por `OrderPersistenceAdapter`
+con H2 vía R2DBC (mismo stack que `salud`, sin Docker):
+`persistence/entity/OrderEntity`, `persistence/mapper/OrderPersistenceMapper`,
+`SpringDataOrderRepository`, `schema.sql`.
+
+**Decisión de modelado propia de este dominio**: `Order.items` es una
+`List<LineItem>` — `LineItem` es un Value Object sin identidad propia
+(nunca se consulta independientemente, vive y muere con el `Order`). En vez
+de modelar una tabla hija (`order_line_items`) con joins — que R2DBC no
+cascada automáticamente como JPA, habría que orquestarlo a mano —, se
+serializa la lista completa a **JSON en una sola columna** (`items`) vía
+Jackson, y se deserializa de vuelta al cargar. Es un patrón aceptado en DDD
+para colecciones de Value Objects totalmente contenidas dentro del límite
+del agregado (el agregado se persiste/carga como una unidad).
+
+**Bug real encontrado y corregido al probar con `curl`:** no había ningún
+bean `ObjectMapper` de Jackson disponible para inyectar en este scaffold
+(usa `spring-boot-starter-webclient`, no la combinación estándar que
+autoconfigura Jackson por WebFlux) — `UnsatisfiedDependencyException` al
+arrancar. Fix: el mapper crea su propio `new ObjectMapper()` en vez de
+depender de inyección, ya que no se necesita ninguna configuración especial
+de serialización para este caso.
+
+Mismos dos bugs de `salud` (case-sensitivity de H2 con identificadores no
+citados, e `insert` vs `update` decidido por `R2dbcEntityTemplate` en vez de
+la heurística por defecto de `ReactiveCrudRepository.save()`) se evitaron
+directamente esta vez porque ya se conocían — aplicados desde el inicio acá.
 
 ### Lección real encontrada al portear desde `salud` (2026-09-13)
 
