@@ -1,4 +1,4 @@
-package com.example.hexagonal.architecture.domain.appointment;
+package com.example.hexagonal.architecture.salud.domain.appointment;
 
 import java.time.LocalDateTime;
 

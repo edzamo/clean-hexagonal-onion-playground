@@ -1,4 +1,4 @@
-package com.example.hexagonal.architecture.domain.appointment;
+package com.example.hexagonal.architecture.salud.domain.appointment;
 
 public enum AppointmentStatus {
     REQUESTED,
