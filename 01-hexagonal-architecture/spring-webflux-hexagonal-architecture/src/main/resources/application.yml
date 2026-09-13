@@ -1,6 +1,13 @@
 spring:
   application:
     name: spring-webflux-hexagonal-architecture
+  r2dbc:
+    url: r2dbc:h2:mem:///saluddb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
 
 springdoc:
   swagger-ui:

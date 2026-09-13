@@ -104,6 +104,37 @@ Architecture* de Tom Hombergs), que tampoco repite el nombre del agregado en
       genera el `UUID` al guardar (identidad asignada por infraestructura,
       no por el dominio) — válido, pero es una decisión a tener presente.
       Sin dependencias nuevas en `build.gradle` todavía (no hay R2DBC/Mongo).
+    - **(2026-09-13, actualización) reemplazado por persistencia real**:
+      `AppointmentPersistenceAdapter` + H2 vía R2DBC (`spring-boot-starter-data-r2dbc`,
+      `r2dbc-h2`), sin Docker. Nueva estructura:
+      `adapter/out/persistence/entity/AppointmentEntity` (`@Table`/`@Column`,
+      distinta de la entidad de dominio), `adapter/out/persistence/mapper/
+      AppointmentPersistenceMapper` (Entity↔Domain), `SpringDataAppointmentRepository`
+      (`ReactiveCrudRepository`), `schema.sql` con el DDL. La sustituibilidad
+      prometida se cumplió: `domain`/`application` no cambiaron nada al
+      swapear el adapter in-memory por uno con BD real.
+      **Dos bugs reales encontrados y corregidos al probar con `curl`
+      (no en teoría):**
+      1. *Case sensitivity H2*: columnas declaradas sin comillas en
+         `schema.sql` (`patient_id`) se guardan en MAYÚSCULAS por defecto en
+         H2 (`PATIENT_ID`), pero `@Column("patient_id")` en la entidad las
+         pedía en minúscula, cuoteadas → `BadSqlGrammarException`. Fix:
+         citar explícitamente TODOS los identificadores en minúscula tanto en
+         `schema.sql` (`"patient_id"`) como en cada `@Column("...")` — deja de
+         depender de la convención de casing por defecto de cada lado.
+      2. *`save()` hacía UPDATE en vez de INSERT*: el mapper asigna un `UUID`
+         nuevo antes de guardar (mismo patrón que con el adapter in-memory) —
+         pero `ReactiveCrudRepository.save()` de Spring Data decide
+         INSERT/UPDATE mirando si el `@Id` viene nulo o no; como ya venía con
+         un UUID asignado, Spring Data asumía "ya existe" y emitía un
+         `UPDATE` que no tocaba ninguna fila (fallaba en silencio: el POST
+         devolvía 201 con los datos correctos, pero el `GET` siguiente daba
+         404 porque nunca se insertó). Fix: usar `R2dbcEntityTemplate`
+         (`entityTemplate.insert(entity)` / `.update(entity)`) decidiendo
+         explícitamente según si `appointment.getId() == null` **antes** de
+         que el mapper le asigne el UUID — el adapter decide la intención
+         (crear vs. actualizar), no una heurística basada en si el campo es
+         null en el objeto ya construido.
     - `adapter/in/web/AppointmentController` (`@RestController`,
       `/appointments`) expone los 8 casos de uso vía HTTP, con DTOs propios
       (`RequestAppointmentRequest`, `RescheduleAppointmentRequest`,
