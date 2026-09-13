@@ -106,6 +106,27 @@ citados, e `insert` vs `update` decidido por `R2dbcEntityTemplate` en vez de
 la heurística por defecto de `ReactiveCrudRepository.save()`) se evitaron
 directamente esta vez porque ya se conocían — aplicados desde el inicio acá.
 
+### Operadores de error de Reactor + Testing (2026-09-13) — mismo patrón que `salud`
+
+`OrderPersistenceAdapter.save()` agrega `.doOnError` (logging, `@Slf4j`) +
+`.onErrorMap(DataAccessException.class, ex -> new OrderPersistenceException(...))`
+(`application/port/out`, agnóstico de tecnología) → `503` en
+`GlobalExceptionHandler`. `retryWhen`/`onErrorResume` no se usan por la misma
+razón que en `salud`: no hay ninguna llamada `WebClient` a un servicio
+externo en este proyecto todavía.
+
+**Testing**, misma pirámide: `OrderTest` (dominio, JUnit puro, ciclo de vida
+completo + transiciones inválidas), `PlaceOrderServiceTest`/
+`PayOrderServiceTest` (Mockito + `StepVerifier`, casos crear/mutar-encontrado/
+mutar-no-encontrado), `OrderControllerTest` (`@WebFluxTest` +
+`@MockitoBean`, verifica vacío→404 y `@Valid` rechazando items vacíos),
+`OrderEndToEndTest` (`@SpringBootTest(RANDOM_PORT)` +
+`@AutoConfigureWebTestClient`, flujo completo contra la BD H2 real). Todo en
+verde a la primera corrida — las incompatibilidades de paquete de Spring Boot
+4/Jackson 3 (`@WebFluxTest`, `@MockitoBean`, `@AutoConfigureWebTestClient`,
+`tools.jackson.databind.JsonNode`) ya se conocían de `salud`, así que se
+usaron los imports correctos desde el inicio.
+
 ### Lección real encontrada al portear desde `salud` (2026-09-13)
 
 `Order` originalmente era un **`record` anémico** (solo datos: `id`,

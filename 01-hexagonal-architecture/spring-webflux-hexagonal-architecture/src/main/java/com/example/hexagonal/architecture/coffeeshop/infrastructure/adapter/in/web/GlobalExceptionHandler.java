@@ -1,5 +1,6 @@
 package com.example.hexagonal.architecture.coffeeshop.infrastructure.adapter.in.web;
 
+import com.example.hexagonal.architecture.coffeeshop.application.port.out.OrderPersistenceException;
 import com.example.hexagonal.architecture.coffeeshop.domain.order.InvalidOrderTransitionException;
 import com.example.hexagonal.architecture.coffeeshop.domain.order.OrderNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleInvalidInput(IllegalArgumentException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderPersistenceException.class)
+    public ProblemDetail handlePersistenceFailure(OrderPersistenceException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, "Order storage is temporarily unavailable");
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
