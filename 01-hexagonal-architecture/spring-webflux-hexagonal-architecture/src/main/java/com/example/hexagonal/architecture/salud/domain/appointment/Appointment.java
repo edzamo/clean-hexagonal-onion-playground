@@ -64,7 +64,7 @@ public class Appointment {
 
     public Appointment confirm() {
         if (status != AppointmentStatus.REQUESTED) {
-            throw new IllegalStateException("Only a requested appointment can be confirmed");
+            throw new InvalidAppointmentTransitionException("Only a requested appointment can be confirmed");
         }
         status = AppointmentStatus.CONFIRMED;
         return this;
@@ -72,7 +72,7 @@ public class Appointment {
 
     public Appointment reschedule(TimeSlot newSchedule) {
         if (status != AppointmentStatus.REQUESTED && status != AppointmentStatus.CONFIRMED) {
-            throw new IllegalStateException("Appointment can no longer be rescheduled");
+            throw new InvalidAppointmentTransitionException("Appointment can no longer be rescheduled");
         }
         this.schedule = newSchedule;
         return this;
@@ -80,7 +80,7 @@ public class Appointment {
 
     public Appointment start() {
         if (status != AppointmentStatus.CONFIRMED) {
-            throw new IllegalStateException("Only a confirmed appointment can start");
+            throw new InvalidAppointmentTransitionException("Only a confirmed appointment can start");
         }
         status = AppointmentStatus.IN_PROGRESS;
         return this;
@@ -88,7 +88,7 @@ public class Appointment {
 
     public Appointment complete() {
         if (status != AppointmentStatus.IN_PROGRESS) {
-            throw new IllegalStateException("Only an in-progress appointment can be completed");
+            throw new InvalidAppointmentTransitionException("Only an in-progress appointment can be completed");
         }
         status = AppointmentStatus.COMPLETED;
         return this;
@@ -96,7 +96,7 @@ public class Appointment {
 
     public Appointment cancel(CancellationReason reason) {
         if (!canBeCancelled()) {
-            throw new IllegalStateException("Appointment can no longer be cancelled");
+            throw new InvalidAppointmentTransitionException("Appointment can no longer be cancelled");
         }
         status = AppointmentStatus.CANCELLED;
         this.cancellationReason = reason;
@@ -105,7 +105,7 @@ public class Appointment {
 
     public Appointment markNoShow() {
         if (status != AppointmentStatus.CONFIRMED) {
-            throw new IllegalStateException("Only a confirmed appointment can be marked as no-show");
+            throw new InvalidAppointmentTransitionException("Only a confirmed appointment can be marked as no-show");
         }
         status = AppointmentStatus.NO_SHOW;
         return this;
