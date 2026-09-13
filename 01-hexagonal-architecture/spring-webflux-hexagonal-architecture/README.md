@@ -25,7 +25,9 @@ salud/
     service/                 → implementación de los casos de uso (@RequiredArgsConstructor)
   infrastructure/
     adapter/in/web/            → AppointmentController (REST reactivo) + DTOs (@Valid) + ProblemDetail handler
-    adapter/out/persistence/   → InMemoryAppointmentPersistenceAdapter (in-memory por ahora)
+    adapter/out/persistence/   → AppointmentPersistenceAdapter — H2 real vía R2DBC (sin Docker)
+      entity/                   → AppointmentEntity (@Table, distinta del dominio)
+      mapper/                   → AppointmentPersistenceMapper (Entity↔Domain)
     config/                    → @Configuration de infraestructura (hoy: OpenApiConfig)
 ```
 
