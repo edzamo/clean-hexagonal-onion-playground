@@ -14,7 +14,7 @@ se resolvieron ahí — ver más abajo). Dominio: inventario (`Product` + `Stock
 - Palermo, J. — [*The Onion Architecture*](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/)
   (2008), el artículo original que define el patrón.
 - El proyecto que el usuario agregó como referencia,
-  [`01-hexagonal-architecture/coffee-shop-hexagonal-con-IA-main`](../../01-hexagonal-architecture/coffee-shop-hexagonal-con-IA-main)
+  [`01-hexagonal-architecture/coffee-shop-hexagonal-main`](../../01-hexagonal-architecture/coffee-shop-hexagonal-main)
   (basado a su vez en [arhohuttunen.com/hexagonal-architecture-spring-boot](https://www.arhohuttunen.com/hexagonal-architecture-spring-boot/)) —
   de ahí se tomó la convención de que las interfaces de repositorio vivan en
   `domain/repository` (no en `application`), que también se usa acá.

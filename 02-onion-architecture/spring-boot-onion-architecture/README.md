@@ -58,7 +58,7 @@ curl -X POST http://localhost:8080/products/{id}/discontinue
 
 - **Jeffrey Palermo** — [*The Onion Architecture*](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) (2008).
 - Proyecto de referencia agregado por el usuario:
-  [`coffee-shop-hexagonal-con-IA-main`](../../01-hexagonal-architecture/coffee-shop-hexagonal-con-IA-main)
+  [`coffee-shop-hexagonal-main`](../../01-hexagonal-architecture/coffee-shop-hexagonal-main)
   (basado en [arhohuttunen.com/hexagonal-architecture-spring-boot](https://www.arhohuttunen.com/hexagonal-architecture-spring-boot/)) —
   de ahí la convención de `domain/repository` para las interfaces de persistencia.
 - Mismas referencias generales de Spring/DDD ya citadas en
