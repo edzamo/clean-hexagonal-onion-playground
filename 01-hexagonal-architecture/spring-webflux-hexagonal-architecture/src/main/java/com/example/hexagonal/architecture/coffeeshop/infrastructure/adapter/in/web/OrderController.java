@@ -1,4 +1,4 @@
-package com.example.hexagonal.architecture.infrastructure.adapter.in.web;
+package com.example.hexagonal.architecture.coffeeshop.infrastructure.adapter.in.web;
 
 
 import org.springframework.web.bind.annotation.GetMapping;

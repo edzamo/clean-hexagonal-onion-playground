@@ -1,4 +1,4 @@
-package com.example.hexagonal.architecture.domain.order;
+package com.example.hexagonal.architecture.coffeeshop.domain.order;
 
 import java.util.List;
 import java.util.UUID;
