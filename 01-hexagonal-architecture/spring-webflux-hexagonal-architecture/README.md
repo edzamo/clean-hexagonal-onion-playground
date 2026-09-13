@@ -24,7 +24,9 @@ coffeeshop/
     service/                  → implementación de los casos de uso (@RequiredArgsConstructor)
   infrastructure/
     adapter/in/web/             → OrderController (REST reactivo) + DTOs (@Valid) + ProblemDetail handler
-    adapter/out/persistence/    → InMemoryOrderPersistenceAdapter (in-memory por ahora)
+    adapter/out/persistence/    → OrderPersistenceAdapter — H2 real vía R2DBC (sin Docker)
+      entity/                    → OrderEntity (@Table, distinta del dominio)
+      mapper/                    → OrderPersistenceMapper (Entity↔Domain, items como JSON)
     config/                     → @Configuration de infraestructura (OpenApiConfig)
 ```
 
