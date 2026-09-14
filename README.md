@@ -27,6 +27,12 @@ La tabla comparativa completa, los diagramas de cada estilo y la guía de
 
 📄 **[`docs/architecture-notes-and-diagrams/comparacion-arquitecturas.md`](docs/architecture-notes-and-diagrams/comparacion-arquitecturas.md)**
 
+Y una versión corta tipo "píldora de estudio" (diagrama único, estructura de
+carpetas lado a lado, ventajas/desventajas y cómo justificar la elección),
+pensada para repasar antes de una entrevista técnica de arquitecto/tech lead:
+
+📄 **[`docs/architecture-notes-and-diagrams/pildora-entrevista-arquitecto.md`](docs/architecture-notes-and-diagrams/pildora-entrevista-arquitecto.md)**
+
 ## Estrategia de aprendizaje
 
 - **01-hexagonal-architecture** se construyó con una estrategia A/B: dos
