@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     uuid VARCHAR(36) NOT NULL UNIQUE,
+    version BIGINT NOT NULL DEFAULT 0,
     order_date DATETIME NOT NULL,
     total_amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(50) NOT NULL,
@@ -32,29 +33,33 @@ CREATE TABLE order_items (
     FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
--- Creación de la tabla 'payments' con su propio 'uuid' público.
+-- Creación de la tabla 'payments'. Referencia la orden por su UUID público (order_uuid -> orders.uuid),
+-- igual que PaymentJpaEntity. Nunca se guarda el número completo de tarjeta: solo last4.
 CREATE TABLE payments (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    uuid VARCHAR(36) NOT NULL UNIQUE,
+    order_uuid VARCHAR(36) NOT NULL UNIQUE,
+    last4 VARCHAR(4) NOT NULL,
+    card_holder_name VARCHAR(255) NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
-    payment_date DATETIME NOT NULL,
+    payment_date DATE NOT NULL,
     payment_method VARCHAR(50) NOT NULL,
     status VARCHAR(50) NOT NULL,
-    -- La columna order_id debe ser única para forzar la relación One-to-One a nivel de BD.
-    order_id BIGINT NOT NULL UNIQUE,
-    FOREIGN KEY (order_id) REFERENCES orders(id)
+    FOREIGN KEY (order_uuid) REFERENCES orders(uuid)
 );
+
+-- Estados de orden = estados del dominio: PAYMENT_EXPECTED, PAID, PREPARING, READY, TAKEN (no existe CANCELLED:
+-- cancelar una orden la elimina).
 
 -- Pedido 1: Un pedido para tomar en tienda, que ya ha sido pagado.
 INSERT INTO orders (id, uuid, order_date, total_amount, status, location)
-VALUES (1, 'f47ac10b-58cc-4372-a567-0e02b2c3d479', '2024-05-21 10:30:00', 9.50, 'COMPLETED', 'IN_STORE');
+VALUES (1, 'f47ac10b-58cc-4372-a567-0e02b2c3d479', '2024-05-21 10:30:00', 9.50, 'PAID', 'IN_STORE');
 INSERT INTO order_items (order_id, drink, milk, size, quantity) VALUES (1, 'CAPPUCCINO', 'WHOLE', 'LARGE', 1);
 -- Asumimos que las galletas u otros items se modelarían de forma similar o como un producto genérico.
 -- Por simplicidad, nos enfocamos en las bebidas que define el LineItem.
-INSERT INTO payments (id, uuid, amount, payment_date, payment_method, status, order_id)
-VALUES (1, 'e6a3f5b3-4c2d-4e8f-b9a1-5c6d7e8f9a0b', 9.50, '2024-05-21 10:31:00', 'CREDIT_CARD', 'COMPLETED', 1);
+INSERT INTO payments (id, order_uuid, last4, card_holder_name, amount, payment_date, payment_method, status)
+VALUES (1, 'f47ac10b-58cc-4372-a567-0e02b2c3d479', '1111', 'Ana Perez', 9.50, '2024-05-21', 'CREDIT_CARD', 'COMPLETED');
 
 -- Pedido 2: Un pedido para llevar, pendiente de pago.
 INSERT INTO orders (id, uuid, order_date, total_amount, status, location)
-VALUES (2, 'd290f1ee-6c54-4b01-90e6-d701748f0851', '2024-05-21 11:00:00', 4.75, 'PENDING_PAYMENT', 'TAKE_AWAY');
+VALUES (2, 'd290f1ee-6c54-4b01-90e6-d701748f0851', '2024-05-21 11:00:00', 4.75, 'PAYMENT_EXPECTED', 'TAKE_AWAY');
 INSERT INTO order_items (order_id, drink, milk, size, quantity) VALUES (2, 'ESPRESSO', 'SKIMMED', 'SMALL', 1);

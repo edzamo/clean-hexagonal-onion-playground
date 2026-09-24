@@ -111,8 +111,12 @@ Proyecto base con arquitectura hexagonal usando Java 17+ y Spring Boot.
 ## 🚀 Ejecutar localmente
 
 ```bash
-./gradlew bootRun
+# Desarrollo local: crea tablas (ddl-auto update), muestra SQL y carga datos de ejemplo
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
+
+Sin el perfil `dev` la configuración base es estricta (`ddl-auto: validate`, sin SQL en logs): el esquema
+debe existir (ver `src/main/resources/db/coffee_shop.sql`).
 
 ---
 

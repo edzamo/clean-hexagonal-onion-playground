@@ -5,15 +5,32 @@ import java.math.BigDecimal;
 import com.ezamora.coffeeshop.domain.model.enums.Drink;
 import com.ezamora.coffeeshop.domain.model.enums.Milk;
 import com.ezamora.coffeeshop.domain.model.enums.Size;
+import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
 
+/** Línea de pedido: bebida, leche, tamaño y cantidad (> 0). */
 public record LineItem(Drink drink, Milk milk, Size size, int quantity) {
 
-    // For simplicity every small drink costs 4.0 and large 5.0
-    BigDecimal getCost() {
-        var price = BigDecimal.valueOf(4.0);
-        if (size == Size.LARGE) {
-            price = price.add(BigDecimal.ONE);
+    private static final BigDecimal SMALL_MEDIUM_PRICE = BigDecimal.valueOf(4.0);
+    private static final BigDecimal LARGE_PRICE = BigDecimal.valueOf(5.0);
+
+    public LineItem {
+        if (drink == null) {
+            throw new InvalidOrderException("Line item drink must not be null");
         }
-        return price.multiply(BigDecimal.valueOf(quantity));
+        if (milk == null) {
+            throw new InvalidOrderException("Line item milk must not be null");
+        }
+        if (size == null) {
+            throw new InvalidOrderException("Line item size must not be null");
+        }
+        if (quantity <= 0) {
+            throw new InvalidOrderException("Line item quantity must be greater than zero but was " + quantity);
+        }
+    }
+
+    // Precio simplificado: SMALL y MEDIUM cuestan 4.0, LARGE 5.0 por unidad.
+    BigDecimal getCost() {
+        var unitPrice = size == Size.LARGE ? LARGE_PRICE : SMALL_MEDIUM_PRICE;
+        return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 }

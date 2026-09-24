@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.Order;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderJpaEntity;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<OrderJpaEntity, Long> {
     // Aquí puedes agregar métodos de consulta personalizados si los necesitas
 
-    Optional<Order> findByUuid(UUID uuid);
+    Optional<OrderJpaEntity> findByUuid(UUID uuid);
 }

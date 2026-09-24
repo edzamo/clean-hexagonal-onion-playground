@@ -14,16 +14,22 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = { "id", "order" })
+@ToString(exclude = "order")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "order_items")
-public class OrderItem {
+public class OrderItemJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,25 +37,25 @@ public class OrderItem {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Drink drink;
+    private DrinkJpa drink;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Milk milk;
+    private MilkJpa milk;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Size size;
+    private SizeJpa size;
 
     @Column(nullable = false)
     private int quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    private OrderJpaEntity order;
 
     // Custom setter to maintain bidirectional consistency
-    public void setOrder(Order order) {
+    public void setOrder(OrderJpaEntity order) {
         this.order = order;
     }
 }

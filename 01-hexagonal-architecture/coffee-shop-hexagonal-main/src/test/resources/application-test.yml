@@ -1,0 +1,10 @@
+# Perfil de test: H2 en memoria; el esquema lo genera JPA. DatabaseInitializer (MySQL) queda desactivado.
+spring:
+  datasource:
+    url: jdbc:h2:mem:coffeeshop-test;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop

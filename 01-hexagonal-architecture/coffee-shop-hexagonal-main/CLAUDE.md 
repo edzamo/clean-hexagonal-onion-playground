@@ -1,0 +1,50 @@
+# Proyecto: coffee-shop-hexagonal
+
+Microservicio de pedidos de una cafetería (ordenar, pagar, preparar, entregar).
+
+## Stack
+- Lenguaje: Java 17 (`sourceCompatibility = '17'`)
+- Framework: Spring Boot 3.5.4 (MVC), Spring Data JPA, Bean Validation
+- BD: MySQL (`localhost:3306/coffee-shop`), `ddl-auto: update` (solo dev)
+- Build: Gradle (`gradle test --offline`)
+- Tests: JUnit 5 + Mockito (`spring-boot-starter-test`)
+- Lombok disponible, pero **prohibido** en `domain` y `application`
+
+## Arquitectura
+- Estilo: hexagonal
+- Paquete base: `com.ezamora.coffeeshop`
+- Capas:
+  - `domain/model`
+  - `application/in` (puertos de entrada), `application/out` (puertos de salida), `application/service`
+  - `infrastructure/adapter/in` (controller, DTOs)
+  - `infrastructure/adapter/out/persistence`
+- Puertos: `OrderingCoffee`, `PreparingCoffee` (in); `Orders`, `Payments` (out)
+
+## Convenciones propias
+- Idioma del código: inglés. Comentarios y docs: español.
+- Entidades JPA con sufijo `JpaEntity` (no homónimas al dominio).
+- Errores de dominio → `ProblemDetail` centralizado en `@RestControllerAdvice`.
+- Commits: Conventional Commits.
+
+## Decisiones de persistencia y entrada (entrega 2)
+- Estados persistidos = estados de dominio (PAYMENT_EXPECTED, PAID, PREPARING, READY, TAKEN). CANCELLED no existe: cancelar borra la orden. Migración de datos: `db/migration_v2_order_status_and_payments.sql`.
+- `PaymentJpaEntity` referencia la orden por `order_uuid` (sin asociación JPA) para que `persistence.payment` no dependa de `persistence.order`; la FK vive en el esquema SQL. `UUIDConverter` vive en `persistence.common`.
+- El límite transaccional lo declara `@Transactional` en los casos de uso `CoffeeShop` y `CoffeeMachine` (INV-12/INV-18; lecturas con `readOnly = true`). Los casos de uso llevan `@Service` + `@Transactional` (únicas anotaciones de Spring permitidas en `application`, junto a los tipos de sus miembros); no existe `BeanConfig`: el `Clock` se declara en `CoffeeShopMainApplication` y `infrastructure.config` solo contiene `DatabaseInitializer`.
+- Errores → `ProblemDetail` en `ApiExceptionHandler`: OrderNotFound/PaymentNotFound 404, OrderStateException 409, InvalidOrder/InvalidCard/validación 422, resto 500 sin detalles.
+- Tests: perfil `test` (H2, `application-test.yml`); `DatabaseInitializer` (MySQL) solo corre fuera de ese perfil.
+
+## Perfiles y concurrencia (ronda de correcciones)
+- Config base segura: `ddl-auto: validate`, `show-sql: false`. Desarrollo local: `--spring.profiles.active=dev` (`application-dev.yml`: update + SQL visible; `DatabaseInitializer` solo en `dev` y falla el arranque si el seed falla). Tests: perfil `test` (H2).
+- `OrderJpaEntity` tiene `@Version` (columna `orders.version`, ver `db/migration_v2_...sql`). Conflictos de versión/unicidad -> 409 genérico. Las transacciones las delimita `@Transactional` en los casos de uso.
+- Fila corrupta (sin ítems) -> `PersistenceDataCorruptedException` -> 500 genérico (no 422).
+- Validación de DTOs: quantity 1..99, items <= 50, titular <= 255, PAN `\d{12,19}`, año 2000..2100, mes 1..12.
+
+## Deuda conocida (no la resuelvas salvo que se pida)
+- **SEC-001 (autenticación) y SEC-002 (propiedad del pedido): EXCEPCIÓN EXPLÍCITA AUTORIZADA POR EL USUARIO.** No se implementan; deuda aceptada: cualquier cliente puede operar sobre cualquier pedido por UUID.
+- SEC-004, SEC-007, SEC-009, SEC-010 y CR-007, CR-009, CR-010: sin resolver (pendientes de la revisión).
+- Sin Flyway/Liquibase: el esquema depende del script SQL y de la migración manual.
+- Cobertura (JaCoCo) no medible sin red: el agente no está en el caché offline.
+
+## Cómo trabajar aquí
+Sigue el flujo de `.claude/CLAUDE.md` (arquitectura → andamiaje → TDD desde el dominio → revisión).
+Ejecuta `./gradlew test` antes y después de cada ciclo.

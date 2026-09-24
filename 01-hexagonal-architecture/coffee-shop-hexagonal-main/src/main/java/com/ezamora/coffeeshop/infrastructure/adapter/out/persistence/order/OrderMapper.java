@@ -1,115 +1,76 @@
 package com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
+import com.ezamora.coffeeshop.domain.model.enums.Drink;
 import com.ezamora.coffeeshop.domain.model.enums.Location;
+import com.ezamora.coffeeshop.domain.model.enums.Milk;
+import com.ezamora.coffeeshop.domain.model.enums.Size;
 import com.ezamora.coffeeshop.domain.model.enums.Status;
+import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
 import com.ezamora.coffeeshop.domain.model.order.LineItem;
-import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderItem;
-
-import lombok.extern.slf4j.Slf4j;
+import com.ezamora.coffeeshop.domain.model.order.Order;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.DrinkJpa;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.MilkJpa;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderItemJpaEntity;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderJpaEntity;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderLocation;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderStatus;
+import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.SizeJpa;
+import com.ezamora.coffeeshop.infrastructure.error.PersistenceDataCorruptedException;
 
 /**
- * Mapper class to convert between domain Order objects and persistence Order entities.
- * This class is final and has a private constructor as it's a utility class with only static methods.
+ * Mapper biyectivo entre el {@link Order} de dominio y {@link OrderJpaEntity}.
+ * Los enums se mapean por nombre (uno a uno); un test verifica que son exhaustivos.
+ * Una fila que viola invariantes del dominio (p. ej. sin ítems) lanza PersistenceDataCorruptedException;
+ * la fecha de creación la fija el adaptador, no el mapper.
  */
-@Slf4j
 public final class OrderMapper {
 
     private OrderMapper() {
-        // Private constructor to prevent instantiation
     }
 
-    public static com.ezamora.coffeeshop.domain.model.order.Order toDomain(com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.Order orderEntity) {
-
-        if (orderEntity == null) {
-            return null;
+    public static Order toDomain(OrderJpaEntity entity) {
+        try {
+            return Order.rehydrate(
+                    entity.getUuid(),
+                    Location.valueOf(entity.getLocation().name()),
+                    toDomainItems(entity.getItems()),
+                    Status.valueOf(entity.getStatus().name()));
+        } catch (InvalidOrderException e) {
+            throw new PersistenceDataCorruptedException("Stored order " + entity.getUuid() + " is corrupted", e);
         }
-
-        List<LineItem> lineItems = orderEntity.getItems() == null ? Collections.emptyList()
-                : orderEntity.getItems().stream()
-                        .map(OrderMapper::toDomain)
-                        .toList();
-
-        return new com.ezamora.coffeeshop.domain.model.order.Order(
-                orderEntity.getUuid(),
-                toDomain(orderEntity.getLocation()),
-                lineItems,
-                toDomain(orderEntity.getStatus())
-        );
     }
 
-    public static com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.Order toEntity(com.ezamora.coffeeshop.domain.model.order.Order domainOrder) {
-        if (domainOrder == null) {
-            return null;
-        }
+    private static List<LineItem> toDomainItems(List<OrderItemJpaEntity> items) {
+        return items == null ? List.of() : items.stream().map(OrderMapper::toDomain).toList();
+    }
 
-        var orderEntity = com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.Order.builder()
-                .uuid(domainOrder.getId() != null ? domainOrder.getId() : UUID.randomUUID())
-                .orderDate(LocalDateTime.now())
-                .totalAmount(domainOrder.getCost())
-                .location(toEntity(domainOrder.getLocation()))
-                .status(toEntity(domainOrder.getStatus()))
+    public static OrderJpaEntity toEntity(Order order) {
+        var entity = OrderJpaEntity.builder()
+                .uuid(order.getId())
+                .totalAmount(order.getCost())
+                .location(OrderLocation.valueOf(order.getLocation().name()))
+                .status(OrderStatus.valueOf(order.getStatus().name()))
                 .build();
-
-        List<OrderItem> itemEntities = domainOrder.getItems().stream()
-                .map(OrderMapper::toEntity)
-                .toList();
-
-        // Use the helper method to establish the bidirectional link correctly
-        orderEntity.setItems(itemEntities);
-
-        return orderEntity;
+        entity.setItems(order.getItems().stream().map(OrderMapper::toEntity).toList());
+        return entity;
     }
 
-    // Helper methods for LineItem
-    private static LineItem toDomain(OrderItem itemEntity) {
+    private static LineItem toDomain(OrderItemJpaEntity item) {
         return new LineItem(
-                com.ezamora.coffeeshop.domain.model.enums.Drink.valueOf(itemEntity.getDrink().name()),
-                com.ezamora.coffeeshop.domain.model.enums.Milk.valueOf(itemEntity.getMilk().name()),
-                com.ezamora.coffeeshop.domain.model.enums.Size.valueOf(itemEntity.getSize().name()),
-                itemEntity.getQuantity()
-        );
+                Drink.valueOf(item.getDrink().name()),
+                Milk.valueOf(item.getMilk().name()),
+                Size.valueOf(item.getSize().name()),
+                item.getQuantity());
     }
 
-    private static OrderItem toEntity(LineItem lineItem) {
-        return OrderItem.builder()
-                .drink(com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.Drink.valueOf(lineItem.drink().name()))
-                .milk(com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.Milk.valueOf(lineItem.milk().name()))
-                .size(com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.Size.valueOf(lineItem.size().name()))
-                .quantity(lineItem.quantity())
+    private static OrderItemJpaEntity toEntity(LineItem item) {
+        return OrderItemJpaEntity.builder()
+                .drink(DrinkJpa.valueOf(item.drink().name()))
+                .milk(MilkJpa.valueOf(item.milk().name()))
+                .size(SizeJpa.valueOf(item.size().name()))
+                .quantity(item.quantity())
                 .build();
-    }
-
-    // Helper methods for Enums
-    private static Location toDomain(com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderLocation locationEntity) {
-        return Location.valueOf(locationEntity.name());
-    }
-
-    private static com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderLocation toEntity(Location domainLocation) {
-        return com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderLocation.valueOf(domainLocation.name());
-    }
-
-    private static Status toDomain(com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderStatus statusEntity) {
-        return switch (statusEntity) {
-            case PENDING_PAYMENT -> Status.PAYMENT_EXPECTED;
-            // When loading a completed order, we assume it's paid. The application can then move it to other states.
-            case COMPLETED -> Status.PAID;
-            // The domain model currently has no 'CANCELLED' state. This would cause an error if loaded.
-            case CANCELLED -> throw new IllegalStateException("Domain model does not support CANCELLED status.");
-        };
-    }
-
-    private static com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderStatus toEntity(Status domainStatus) {
-        return switch (domainStatus) {
-            case PAYMENT_EXPECTED -> com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderStatus.PENDING_PAYMENT;
-            // All "in-progress" or "finished" states are mapped to COMPLETED in the database.
-            case PAID, PREPARING, READY, TAKEN -> com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderStatus.COMPLETED;
-        };
     }
 }
-
-

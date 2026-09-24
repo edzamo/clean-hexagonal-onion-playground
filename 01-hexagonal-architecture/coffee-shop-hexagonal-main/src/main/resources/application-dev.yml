@@ -1,0 +1,7 @@
+# Perfil de desarrollo local (--spring.profiles.active=dev): JPA crea/actualiza tablas,
+# muestra SQL y DatabaseInitializer carga los datos de ejemplo. No usar en producción.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

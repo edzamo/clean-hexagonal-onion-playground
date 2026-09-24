@@ -1,26 +1,25 @@
 package com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.ezamora.coffeeshop.application.out.OrderNotFound;
 import com.ezamora.coffeeshop.application.out.Orders;
 import com.ezamora.coffeeshop.domain.model.order.Order;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Service
+/** Adaptador de salida del puerto {@link Orders} sobre JPA. */
+@Component
 @RequiredArgsConstructor
-@Slf4j
 public class OrderServiceAdapter implements Orders {
 
     private final OrderRepository orderRepository;
 
     @Override
     public Order findOrderById(UUID orderId) throws OrderNotFound {
-        log.info("Finding OrderServiceAdapter with ID: {}", orderId);
         return orderRepository.findByUuid(orderId)
                 .map(OrderMapper::toDomain)
                 .orElseThrow(() -> new OrderNotFound("Order not found with id: " + orderId));
@@ -28,30 +27,28 @@ public class OrderServiceAdapter implements Orders {
 
     @Override
     public Order save(Order order) {
-       
-        var newEntityState = OrderMapper.toEntity(order);
+        var newState = OrderMapper.toEntity(order);
 
-        if (order.getId() != null) {
-            var existingEntity = orderRepository.findByUuid(order.getId())
-                    .orElseThrow(() -> new OrderNotFound("Cannot update an order that does not exist: " + order.getId()));
+        // Si ya existe se actualiza la entidad gestionada: conserva id interno y fecha de creación.
+        var entity = orderRepository.findByUuid(order.getId()).map(existing -> {
+            existing.setStatus(newState.getStatus());
+            existing.setLocation(newState.getLocation());
+            existing.setTotalAmount(newState.getTotalAmount());
+            existing.setItems(newState.getItems());
+            return existing;
+        }).orElseGet(() -> {
+            newState.setOrderDate(LocalDateTime.now());
+            return newState;
+        });
 
-            // Preserva el ID interno de la BD para asegurar un UPDATE, no un INSERT.
-            newEntityState.setId(existingEntity.getId());
-            // Preserva la fecha de creación original, ya que no debería cambiar.
-            newEntityState.setOrderDate(existingEntity.getOrderDate());
-        }
-
-        var savedEntity = orderRepository.save(newEntityState);
-        return OrderMapper.toDomain(savedEntity);
+        return OrderMapper.toDomain(orderRepository.save(entity));
     }
 
     @Override
     public void deleteById(UUID orderId) {
-        // Primero debemos encontrar la entidad por su UUID público, ya que el método
-        // deleteById del repositorio funciona con la clave primaria interna (Long).
-        var orderEntity = orderRepository.findByUuid(orderId)
+        // El repositorio trabaja con la PK interna (Long); se localiza primero por el UUID público.
+        var entity = orderRepository.findByUuid(orderId)
                 .orElseThrow(() -> new OrderNotFound("Cannot delete an order that does not exist: " + orderId));
-        orderRepository.delete(orderEntity);
+        orderRepository.delete(entity);
     }
-
 }

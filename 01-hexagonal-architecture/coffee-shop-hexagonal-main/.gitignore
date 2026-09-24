@@ -13,6 +13,8 @@
 .DS_Store
 .vscode/
 
+.claude/
+
 # Gradle Wrapper files
 gradlew
 gradlew.bat

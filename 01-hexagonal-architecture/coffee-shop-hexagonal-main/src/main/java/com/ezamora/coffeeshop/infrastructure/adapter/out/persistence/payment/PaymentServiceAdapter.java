@@ -2,29 +2,30 @@ package com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.payment;
 
 import java.util.UUID;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+import com.ezamora.coffeeshop.application.out.PaymentNotFound;
 import com.ezamora.coffeeshop.application.out.Payments;
 import com.ezamora.coffeeshop.domain.model.payment.Payment;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Service
+/** Adaptador de salida del puerto {@link Payments} sobre JPA. */
+@Component
 @RequiredArgsConstructor
-@Slf4j
 public class PaymentServiceAdapter implements Payments {
+
+    private final PaymentRepository paymentRepository;
 
     @Override
     public Payment findPaymentByOrderId(UUID orderId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findPaymentByOrderId'");
+        return paymentRepository.findByOrderUuid(orderId)
+                .map(PaymentMapper::toDomain)
+                .orElseThrow(() -> new PaymentNotFound("Payment not found for order: " + orderId));
     }
 
     @Override
     public Payment save(Payment payment) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'save'");
+        return PaymentMapper.toDomain(paymentRepository.save(PaymentMapper.toEntity(payment)));
     }
-
 }

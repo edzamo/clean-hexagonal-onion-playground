@@ -1,15 +1,24 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.5'
-    id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.springframework.boot' version '3.5.4'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.ezamora.mcp'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 
 repositories {
     mavenCentral()
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 dependencies {
@@ -22,4 +31,6 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.3.0'
+    testRuntimeOnly 'com.h2database:h2'
 }

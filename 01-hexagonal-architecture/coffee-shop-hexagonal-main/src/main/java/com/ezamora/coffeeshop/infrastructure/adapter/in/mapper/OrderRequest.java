@@ -5,9 +5,14 @@ import java.util.List;
 import com.ezamora.coffeeshop.domain.model.enums.Location;
 import com.ezamora.coffeeshop.domain.model.order.Order;
 
-public record OrderRequest(Location location, List<LineItemRequest> items) {
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record OrderRequest(@NotNull Location location, @NotEmpty @Size(max = 50) List<@Valid @NotNull LineItemRequest> items) {
 
     public Order toDomain() {
-        return new Order(location, items.stream().map(LineItemRequest::toDomain).toList());
+        return Order.create(location, items.stream().map(LineItemRequest::toDomain).toList());
     }
 }
