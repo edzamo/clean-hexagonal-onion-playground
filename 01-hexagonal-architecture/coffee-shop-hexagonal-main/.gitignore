@@ -1,0 +1,24 @@
+/build/
+/bin/
+/out/
+.gradle/
+.idea/
+/*.iml
+*.log
+*.class
+*.jar
+*.war
+*.db
+.env
+.DS_Store
+.vscode/
+
+.claude/
+
+# Gradle Wrapper files
+gradlew
+gradlew.bat
+gradle/
+gradle/wrapper/
+/bin/gradle-wrapper.jar
+/bin/main/

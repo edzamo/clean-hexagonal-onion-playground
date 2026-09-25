@@ -1,0 +1,14 @@
+# Reglas a nivel de repo — cada proyecto (01-/02-/03-) tiene su propio
+# .gitignore específico de Gradle/Spring Boot; esto cubre lo que puede
+# aparecer en cualquier carpeta, sin relación con el código.
+
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Logs sueltos
+*.log

@@ -1,0 +1,15 @@
+# Configuración base (segura): el esquema debe existir (validate) y no se vuelca SQL a los logs.
+# Para desarrollo local con creación automática de tablas y datos de ejemplo: --spring.profiles.active=dev
+server:
+  port: 9000
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/coffee-shop?createDatabaseIfNotExist=true
+    username: ezamora
+    password: ezamora
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
