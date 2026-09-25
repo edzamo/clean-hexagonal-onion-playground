@@ -8,15 +8,42 @@ Java 17, Spring Boot 3.5, Spring Data JPA, Bean Validation, MySQL, Gradle. Tests
 
 ## Estructura de paquetes (`com.ezamora.coffeeshop`)
 ```
-domain/                      order, payment, exception, enums (sin frameworks)
-application/in               puertos de entrada: OrderingCoffee, PreparingCoffee
-application/out              puertos de salida: Orders, Payments
-application/service          casos de uso: CoffeeShop, CoffeeMachine
-infrastructure/adapter/in/web        OrderController, ApiExceptionHandler
-infrastructure/adapter/in/web/dto    DTOs de petición/respuesta
-infrastructure/adapter/out/persistence   order, payment, common (JPA)
-infrastructure/config        DatabaseInitializer (perfil dev)
+domain/                                  núcleo puro, sin frameworks
+├── order/                               Order (agregado), LineItem
+├── payment/                             Payment, CreditCard, Receipt
+├── enums/                               Drink, Milk, Size, Location, Status
+└── exception/                           InvalidOrderException, OrderStateException, InvalidCardException
+
+application/                             casos de uso y puertos
+├── in/                                  puertos de entrada: OrderingCoffee, PreparingCoffee
+├── out/                                 puertos de salida: Orders, Payments (+ OrderNotFound, PaymentNotFound)
+└── service/                             implementan los puertos de entrada: CoffeeShop, CoffeeMachine
+
+infrastructure/                          adaptadores y configuración
+├── adapter/in/web/                      OrderController, ApiExceptionHandler (ProblemDetail)
+│   └── dto/                             *Request / *Response (el dominio no se expone)
+├── adapter/out/persistence/             implementan Orders y Payments con JPA
+│   ├── order/                           OrderServiceAdapter, OrderRepository, OrderMapper
+│   │   └── entity/                      OrderJpaEntity, OrderItemJpaEntity, enums *Jpa/OrderStatus/OrderLocation
+│   ├── payment/                         PaymentServiceAdapter, PaymentRepository, PaymentMapper, PaymentJpaEntity
+│   └── common/                          UUIDConverter
+├── config/                              DatabaseInitializer (perfil dev)
+└── error/                               PersistenceDataCorruptedException
+
+CoffeeShopMainApplication                punto de arranque Spring Boot
 ```
+
+Regla de dependencias: `infrastructure → application → domain`. Nunca al revés; lo verifica
+`architecture/ArchitectureTest` (ArchUnit). Los adaptadores de persistencia mapean entre entidades JPA y
+dominio con `OrderMapper`/`PaymentMapper`, así que el dominio no conoce JPA.
+
+Recursos (`src/main/resources`): `application.yml`, `application-dev.yml`, `openapi.yaml`, `db/coffee_shop.sql`
+y `db/migration_v2_order_status_and_payments.sql`.
+
+Tests (`src/test`): unitarios de dominio y servicios con `InMemoryOrders`/`InMemoryPayments`,
+tests de contrato compartidos (`contract/OrdersContract`, `PaymentsContract`) que validan tanto los
+in-memory como los adaptadores reales, tests de adaptadores web/persistencia, `ArchitectureTest` y
+tests de extremo a extremo.
 
 ## Ejecutar
 Requiere MySQL (`docker-compose -f docker-compose-mysql.yml up -d`).
