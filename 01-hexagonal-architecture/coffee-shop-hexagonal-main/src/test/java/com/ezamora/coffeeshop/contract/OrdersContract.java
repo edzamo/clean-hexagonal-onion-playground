@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ezamora.coffeeshop.application.out.OrderNotFound;
 import com.ezamora.coffeeshop.application.out.Orders;
-import com.ezamora.coffeeshop.domain.model.enums.Drink;
-import com.ezamora.coffeeshop.domain.model.enums.Location;
-import com.ezamora.coffeeshop.domain.model.enums.Milk;
-import com.ezamora.coffeeshop.domain.model.enums.Size;
-import com.ezamora.coffeeshop.domain.model.enums.Status;
-import com.ezamora.coffeeshop.domain.model.order.LineItem;
-import com.ezamora.coffeeshop.domain.model.order.Order;
+import com.ezamora.coffeeshop.domain.enums.Drink;
+import com.ezamora.coffeeshop.domain.enums.Location;
+import com.ezamora.coffeeshop.domain.enums.Milk;
+import com.ezamora.coffeeshop.domain.enums.Size;
+import com.ezamora.coffeeshop.domain.enums.Status;
+import com.ezamora.coffeeshop.domain.order.LineItem;
+import com.ezamora.coffeeshop.domain.order.Order;
 
 /** Contrato del puerto {@link Orders}: lo ejecutan el fake en memoria y el adaptador JPA. */
 @Transactional

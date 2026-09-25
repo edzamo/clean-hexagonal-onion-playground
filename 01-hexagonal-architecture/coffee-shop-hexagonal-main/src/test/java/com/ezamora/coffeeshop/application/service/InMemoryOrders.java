@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import com.ezamora.coffeeshop.application.out.OrderNotFound;
 import com.ezamora.coffeeshop.application.out.Orders;
-import com.ezamora.coffeeshop.domain.model.order.Order;
+import com.ezamora.coffeeshop.domain.order.Order;
 
 /** Doble en memoria del puerto de salida {@link Orders}; registra los eventos en orden. */
 class InMemoryOrders implements Orders {

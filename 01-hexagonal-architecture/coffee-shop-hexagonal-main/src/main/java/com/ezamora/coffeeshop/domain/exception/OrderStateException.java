@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.domain.model.exception;
+package com.ezamora.coffeeshop.domain.exception;
 
 /** Error de dominio (sin dependencias de framework). */
 public class OrderStateException extends RuntimeException {

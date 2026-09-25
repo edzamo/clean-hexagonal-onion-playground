@@ -2,7 +2,7 @@ package com.ezamora.coffeeshop.application.in;
 
 import java.util.UUID;
 
-import com.ezamora.coffeeshop.domain.model.order.Order;
+import com.ezamora.coffeeshop.domain.order.Order;
 
 public interface  PreparingCoffee {
 

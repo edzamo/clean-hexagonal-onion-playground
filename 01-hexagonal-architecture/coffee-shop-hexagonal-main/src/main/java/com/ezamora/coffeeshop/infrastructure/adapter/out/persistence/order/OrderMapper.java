@@ -2,14 +2,14 @@ package com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order;
 
 import java.util.List;
 
-import com.ezamora.coffeeshop.domain.model.enums.Drink;
-import com.ezamora.coffeeshop.domain.model.enums.Location;
-import com.ezamora.coffeeshop.domain.model.enums.Milk;
-import com.ezamora.coffeeshop.domain.model.enums.Size;
-import com.ezamora.coffeeshop.domain.model.enums.Status;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
-import com.ezamora.coffeeshop.domain.model.order.LineItem;
-import com.ezamora.coffeeshop.domain.model.order.Order;
+import com.ezamora.coffeeshop.domain.enums.Drink;
+import com.ezamora.coffeeshop.domain.enums.Location;
+import com.ezamora.coffeeshop.domain.enums.Milk;
+import com.ezamora.coffeeshop.domain.enums.Size;
+import com.ezamora.coffeeshop.domain.enums.Status;
+import com.ezamora.coffeeshop.domain.exception.InvalidOrderException;
+import com.ezamora.coffeeshop.domain.order.LineItem;
+import com.ezamora.coffeeshop.domain.order.Order;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.DrinkJpa;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.MilkJpa;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderItemJpaEntity;

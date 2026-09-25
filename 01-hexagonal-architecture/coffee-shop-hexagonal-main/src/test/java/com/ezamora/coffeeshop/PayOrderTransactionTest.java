@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.infrastructure.config;
+package com.ezamora.coffeeshop;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,16 +26,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.ezamora.coffeeshop.application.in.OrderingCoffee;
-import com.ezamora.coffeeshop.domain.model.enums.Drink;
-import com.ezamora.coffeeshop.domain.model.enums.Location;
-import com.ezamora.coffeeshop.domain.model.enums.Milk;
-import com.ezamora.coffeeshop.domain.model.enums.Size;
-import com.ezamora.coffeeshop.domain.model.enums.Status;
-import com.ezamora.coffeeshop.domain.model.exception.OrderStateException;
-import com.ezamora.coffeeshop.domain.model.order.LineItem;
-import com.ezamora.coffeeshop.domain.model.order.Order;
-import com.ezamora.coffeeshop.domain.model.payment.CreditCard;
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
+import com.ezamora.coffeeshop.domain.enums.Drink;
+import com.ezamora.coffeeshop.domain.enums.Location;
+import com.ezamora.coffeeshop.domain.enums.Milk;
+import com.ezamora.coffeeshop.domain.enums.Size;
+import com.ezamora.coffeeshop.domain.enums.Status;
+import com.ezamora.coffeeshop.domain.exception.OrderStateException;
+import com.ezamora.coffeeshop.domain.order.LineItem;
+import com.ezamora.coffeeshop.domain.order.Order;
+import com.ezamora.coffeeshop.domain.payment.CreditCard;
+import com.ezamora.coffeeshop.domain.payment.Payment;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.OrderRepository;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.OrderServiceAdapter;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.payment.PaymentRepository;

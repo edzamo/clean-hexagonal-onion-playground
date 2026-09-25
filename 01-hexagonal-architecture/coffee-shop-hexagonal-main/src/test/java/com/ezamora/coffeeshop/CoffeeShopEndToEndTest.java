@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.ezamora.coffeeshop.domain.model.enums.Status;
+import com.ezamora.coffeeshop.domain.enums.Status;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.OrderRepository;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order.entity.OrderStatus;
 import com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.payment.PaymentRepository;
@@ -94,27 +94,50 @@ class CoffeeShopEndToEndTest {
     }
 
     @Test
-    void payingTwiceIsAConflictAndAnExpiredCardIsUnprocessable() throws Exception {
+    void payingWithAnExpiredCardIsUnprocessableAndLeavesTheOrderUnpaid() throws Exception {
         var id = createOrder();
+
         mockMvc.perform(post("/order/{id}/pay", id).contentType(MediaType.APPLICATION_JSON)
                         .content(payBody("4111111111111111", Year.now().getValue() - 1)))
                 .andExpect(status().isUnprocessableEntity());
-        assertPersistedStatus(id, OrderStatus.PAYMENT_EXPECTED);
 
+        assertPersistedStatus(id, OrderStatus.PAYMENT_EXPECTED);
+    }
+
+    @Test
+    void payingTwiceIsAConflict() throws Exception {
+        var id = createOrder();
         var good = payBody("4111111111111111", Year.now().getValue() + 3);
         mockMvc.perform(post("/order/{id}/pay", id).contentType(MediaType.APPLICATION_JSON).content(good))
                 .andExpect(status().isOk());
+
         mockMvc.perform(post("/order/{id}/pay", id).contentType(MediaType.APPLICATION_JSON).content(good))
                 .andExpect(status().isConflict());
     }
 
     @Test
-    void unknownOrderIs404AndCancellingAnUnpaidOrderDeletesIt() throws Exception {
+    void unknownOrderIs404() throws Exception {
         mockMvc.perform(get("/order/{id}", UUID.randomUUID())).andExpect(status().isNotFound());
+    }
 
+    @Test
+    void cancellingAnUnpaidOrderDeletesIt() throws Exception {
         var id = createOrder();
+
         mockMvc.perform(delete("/order/{id}", id)).andExpect(status().isNoContent());
+
         mockMvc.perform(get("/order/{id}", id)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void anUnpaidOrderCanBeReplacedWithPut() throws Exception {
+        var id = createOrder();
+        var replacement = "{\"location\":\"TAKE_AWAY\",\"items\":[{\"drink\":\"ESPRESSO\",\"milk\":\"SOY\",\"size\":\"SMALL\",\"quantity\":1}]}";
+
+        mockMvc.perform(put("/order/{id}", id).contentType(MediaType.APPLICATION_JSON).content(replacement))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.location").value("TAKE_AWAY"));
+
+        mockMvc.perform(get("/order/{id}", id)).andExpect(jsonPath("$.items[0].drink").value("ESPRESSO"));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.infrastructure.adapter.in.controller;
+package com.ezamora.coffeeshop.infrastructure.adapter.in.web;
 
 import java.util.UUID;
 
@@ -14,11 +14,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.ezamora.coffeeshop.application.in.OrderingCoffee;
 import com.ezamora.coffeeshop.application.in.PreparingCoffee;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.OrderRequest;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.OrderResponse;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.PayRequest;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.PaymentResponse;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.ReceiptResponse;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.OrderRequest;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.OrderResponse;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.PayRequest;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.PaymentResponse;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.ReceiptResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class OrderController {
         return ResponseEntity.created(location).body(OrderResponse.fromDomain(order));
     }
 
-    @PostMapping("/order/{id}")
+    @PutMapping("/order/{id}")
     ResponseEntity<OrderResponse> updateOrder(@PathVariable UUID id, @Valid @RequestBody OrderRequest request) {
         return ResponseEntity.ok(OrderResponse.fromDomain(orderingCoffee.updateOrder(id, request.toDomain())));
     }

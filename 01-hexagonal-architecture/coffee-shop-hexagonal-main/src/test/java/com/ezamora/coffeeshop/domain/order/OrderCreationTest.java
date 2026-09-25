@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.domain.model.order;
+package com.ezamora.coffeeshop.domain.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -10,12 +10,12 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import com.ezamora.coffeeshop.domain.model.enums.Drink;
-import com.ezamora.coffeeshop.domain.model.enums.Location;
-import com.ezamora.coffeeshop.domain.model.enums.Milk;
-import com.ezamora.coffeeshop.domain.model.enums.Size;
-import com.ezamora.coffeeshop.domain.model.enums.Status;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
+import com.ezamora.coffeeshop.domain.enums.Drink;
+import com.ezamora.coffeeshop.domain.enums.Location;
+import com.ezamora.coffeeshop.domain.enums.Milk;
+import com.ezamora.coffeeshop.domain.enums.Size;
+import com.ezamora.coffeeshop.domain.enums.Status;
+import com.ezamora.coffeeshop.domain.exception.InvalidOrderException;
 
 class OrderCreationTest {
 

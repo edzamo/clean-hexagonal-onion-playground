@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.infrastructure.adapter.in.controller;
+package com.ezamora.coffeeshop.infrastructure.adapter.in.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +17,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.ezamora.coffeeshop.application.out.OrderNotFound;
 import com.ezamora.coffeeshop.application.out.PaymentNotFound;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidCardException;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
-import com.ezamora.coffeeshop.domain.model.exception.OrderStateException;
+import com.ezamora.coffeeshop.domain.exception.InvalidCardException;
+import com.ezamora.coffeeshop.domain.exception.InvalidOrderException;
+import com.ezamora.coffeeshop.domain.exception.OrderStateException;
 
 /** Traducción centralizada de errores de dominio/aplicación a {@link ProblemDetail}. */
 @RestControllerAdvice

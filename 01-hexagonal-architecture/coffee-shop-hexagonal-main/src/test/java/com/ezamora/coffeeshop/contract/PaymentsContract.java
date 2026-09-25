@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ezamora.coffeeshop.application.out.PaymentNotFound;
 import com.ezamora.coffeeshop.application.out.Payments;
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
+import com.ezamora.coffeeshop.domain.payment.Payment;
 
 /** Contrato del puerto {@link Payments}: lo ejecutan el fake en memoria y el adaptador JPA. */
 @Transactional

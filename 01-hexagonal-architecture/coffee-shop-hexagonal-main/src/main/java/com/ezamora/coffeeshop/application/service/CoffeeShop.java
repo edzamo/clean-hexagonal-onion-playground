@@ -10,17 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ezamora.coffeeshop.application.in.OrderingCoffee;
 import com.ezamora.coffeeshop.application.out.Orders;
 import com.ezamora.coffeeshop.application.out.Payments;
-import com.ezamora.coffeeshop.domain.model.order.Order;
-import com.ezamora.coffeeshop.domain.model.payment.CreditCard;
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
-import com.ezamora.coffeeshop.domain.model.payment.Receipt;
+import com.ezamora.coffeeshop.domain.order.Order;
+import com.ezamora.coffeeshop.domain.payment.CreditCard;
+import com.ezamora.coffeeshop.domain.payment.Payment;
+import com.ezamora.coffeeshop.domain.payment.Receipt;
 
 /**
- * Casos de uso de pedido de café. Anotaciones de Spring permitidas: {@code @Service} y {@code @Transactional}
- * (unidad de trabajo, p. ej. payOrder escribe pago y orden).
+ * Casos de uso de pedido de café. Anotaciones de Spring permitidas: {@code @Service} y, solo en {@code payOrder}, {@code @Transactional}.
  */
 @Service
-@Transactional
 public class CoffeeShop implements OrderingCoffee {
 
     private final Orders orders;
@@ -50,7 +48,9 @@ public class CoffeeShop implements OrderingCoffee {
         orders.deleteById(orderId);
     }
 
+    /** Escribe en dos puertos (pago y orden): una sola transacción, sin estado parcial (INV-18). */
     @Override
+    @Transactional
     public Payment payOrder(UUID orderId, CreditCard creditCard) {
         var order = orders.findOrderById(orderId);
         creditCard.assertNotExpired(clock);
@@ -64,7 +64,6 @@ public class CoffeeShop implements OrderingCoffee {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Receipt readReceipt(UUID orderId) {
         var order = orders.findOrderById(orderId);
         var payment = payments.findPaymentByOrderId(orderId);
@@ -77,7 +76,6 @@ public class CoffeeShop implements OrderingCoffee {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Order findOrderById(UUID orderId) {
         return orders.findOrderById(orderId);
     }

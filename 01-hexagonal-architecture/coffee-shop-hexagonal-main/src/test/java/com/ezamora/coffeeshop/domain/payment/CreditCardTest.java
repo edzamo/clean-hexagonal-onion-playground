@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.domain.model.payment;
+package com.ezamora.coffeeshop.domain.payment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -12,7 +12,7 @@ import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
-import com.ezamora.coffeeshop.domain.model.exception.InvalidCardException;
+import com.ezamora.coffeeshop.domain.exception.InvalidCardException;
 
 class CreditCardTest {
 

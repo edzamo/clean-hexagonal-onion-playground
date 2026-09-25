@@ -1,11 +1,11 @@
-package com.ezamora.coffeeshop.domain.model.order;
+package com.ezamora.coffeeshop.domain.order;
 
 import java.math.BigDecimal;
 
-import com.ezamora.coffeeshop.domain.model.enums.Drink;
-import com.ezamora.coffeeshop.domain.model.enums.Milk;
-import com.ezamora.coffeeshop.domain.model.enums.Size;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
+import com.ezamora.coffeeshop.domain.enums.Drink;
+import com.ezamora.coffeeshop.domain.enums.Milk;
+import com.ezamora.coffeeshop.domain.enums.Size;
+import com.ezamora.coffeeshop.domain.exception.InvalidOrderException;
 
 /** Línea de pedido: bebida, leche, tamaño y cantidad (> 0). */
 public record LineItem(Drink drink, Milk milk, Size size, int quantity) {

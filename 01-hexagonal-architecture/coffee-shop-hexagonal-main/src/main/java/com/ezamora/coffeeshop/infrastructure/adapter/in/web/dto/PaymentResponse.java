@@ -1,10 +1,10 @@
-package com.ezamora.coffeeshop.infrastructure.adapter.in.mapper;
+package com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
+import com.ezamora.coffeeshop.domain.payment.Payment;
 
 /** Respuesta de pago: solo los últimos 4 dígitos de la tarjeta. */
 public record PaymentResponse(UUID orderId, String last4, String cardHolderName, BigDecimal amount, LocalDate paid) {

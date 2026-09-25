@@ -1,9 +1,9 @@
-package com.ezamora.coffeeshop.infrastructure.adapter.in.mapper;
+package com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto;
 
 import java.time.Month;
 import java.time.Year;
 
-import com.ezamora.coffeeshop.domain.model.payment.CreditCard;
+import com.ezamora.coffeeshop.domain.payment.CreditCard;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

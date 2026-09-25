@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.infrastructure.adapter.in.controller;
+package com.ezamora.coffeeshop.infrastructure.adapter.in.web;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,9 +22,9 @@ import com.ezamora.coffeeshop.application.in.OrderingCoffee;
 import com.ezamora.coffeeshop.application.in.PreparingCoffee;
 import com.ezamora.coffeeshop.application.out.OrderNotFound;
 import com.ezamora.coffeeshop.application.out.PaymentNotFound;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidCardException;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
-import com.ezamora.coffeeshop.domain.model.exception.OrderStateException;
+import com.ezamora.coffeeshop.domain.exception.InvalidCardException;
+import com.ezamora.coffeeshop.domain.exception.InvalidOrderException;
+import com.ezamora.coffeeshop.domain.exception.OrderStateException;
 import com.ezamora.coffeeshop.infrastructure.error.PersistenceDataCorruptedException;
 
 /** Un test por mapeo excepción de dominio -> ProblemDetail. */

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import com.ezamora.coffeeshop.application.out.PaymentNotFound;
 import com.ezamora.coffeeshop.application.out.Payments;
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
+import com.ezamora.coffeeshop.domain.payment.Payment;
 
 /** Doble en memoria del puerto de salida {@link Payments}. */
 class InMemoryPayments implements Payments {

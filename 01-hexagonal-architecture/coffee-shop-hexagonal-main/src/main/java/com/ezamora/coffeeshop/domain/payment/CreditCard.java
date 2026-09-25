@@ -1,11 +1,11 @@
-package com.ezamora.coffeeshop.domain.model.payment;
+package com.ezamora.coffeeshop.domain.payment;
 
 import java.time.Clock;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.Year;
 
-import com.ezamora.coffeeshop.domain.model.exception.InvalidCardException;
+import com.ezamora.coffeeshop.domain.exception.InvalidCardException;
 
 /**
  * Tarjeta de crédito. Valida formato (Luhn) y titular al construirse; la caducidad se

@@ -1,9 +1,9 @@
-package com.ezamora.coffeeshop.infrastructure.adapter.in.mapper;
+package com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto;
 
 import java.util.List;
 
-import com.ezamora.coffeeshop.domain.model.enums.Location;
-import com.ezamora.coffeeshop.domain.model.order.Order;
+import com.ezamora.coffeeshop.domain.enums.Location;
+import com.ezamora.coffeeshop.domain.order.Order;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

@@ -1,4 +1,4 @@
-package com.ezamora.coffeeshop.infrastructure.adapter.in.controller;
+package com.ezamora.coffeeshop.infrastructure.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,20 +30,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.ezamora.coffeeshop.application.in.OrderingCoffee;
 import com.ezamora.coffeeshop.application.in.PreparingCoffee;
 import com.ezamora.coffeeshop.application.out.OrderNotFound;
-import com.ezamora.coffeeshop.domain.model.enums.Drink;
-import com.ezamora.coffeeshop.domain.model.enums.Location;
-import com.ezamora.coffeeshop.domain.model.enums.Milk;
-import com.ezamora.coffeeshop.domain.model.enums.Size;
-import com.ezamora.coffeeshop.domain.model.enums.Status;
-import com.ezamora.coffeeshop.domain.model.exception.OrderStateException;
-import com.ezamora.coffeeshop.domain.model.order.LineItem;
-import com.ezamora.coffeeshop.domain.model.order.Order;
-import com.ezamora.coffeeshop.domain.model.payment.CreditCard;
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
-import com.ezamora.coffeeshop.domain.model.payment.Receipt;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.LineItemRequest;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.OrderRequest;
-import com.ezamora.coffeeshop.infrastructure.adapter.in.mapper.PayRequest;
+import com.ezamora.coffeeshop.domain.enums.Drink;
+import com.ezamora.coffeeshop.domain.enums.Location;
+import com.ezamora.coffeeshop.domain.enums.Milk;
+import com.ezamora.coffeeshop.domain.enums.Size;
+import com.ezamora.coffeeshop.domain.enums.Status;
+import com.ezamora.coffeeshop.domain.exception.OrderStateException;
+import com.ezamora.coffeeshop.domain.order.LineItem;
+import com.ezamora.coffeeshop.domain.order.Order;
+import com.ezamora.coffeeshop.domain.payment.CreditCard;
+import com.ezamora.coffeeshop.domain.payment.Payment;
+import com.ezamora.coffeeshop.domain.payment.Receipt;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.LineItemRequest;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.OrderRequest;
+import com.ezamora.coffeeshop.infrastructure.adapter.in.web.dto.PayRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(OrderController.class)
@@ -219,7 +219,7 @@ class OrderControllerTest {
         var request = new OrderRequest(Location.IN_STORE, List.of(new LineItemRequest(Drink.ESPRESSO, Milk.SOY, Size.SMALL, 2)));
         when(orderingCoffee.updateOrder(eq(ID), any(Order.class))).thenReturn(orderIn(Status.PAYMENT_EXPECTED));
 
-        mockMvc.perform(post("/order/{id}", ID).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/order/{id}", ID).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(ID.toString()));
@@ -230,9 +230,15 @@ class OrderControllerTest {
         var request = new OrderRequest(Location.IN_STORE, List.of(new LineItemRequest(Drink.ESPRESSO, Milk.SOY, Size.SMALL, 2)));
         when(orderingCoffee.updateOrder(eq(ID), any(Order.class))).thenThrow(new OrderStateException("paid"));
 
-        mockMvc.perform(post("/order/{id}", ID).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/order/{id}", ID).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void replacingAnOrderWithPostIsNotAllowed() throws Exception {
+        mockMvc.perform(post("/order/{id}", ID).contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test

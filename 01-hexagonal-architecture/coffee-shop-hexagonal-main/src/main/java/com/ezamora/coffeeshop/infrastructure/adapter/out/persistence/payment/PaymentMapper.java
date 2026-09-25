@@ -1,6 +1,6 @@
 package com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.payment;
 
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
+import com.ezamora.coffeeshop.domain.payment.Payment;
 
 /** Mapper entre el {@link Payment} de dominio y {@link PaymentJpaEntity}. */
 final class PaymentMapper {

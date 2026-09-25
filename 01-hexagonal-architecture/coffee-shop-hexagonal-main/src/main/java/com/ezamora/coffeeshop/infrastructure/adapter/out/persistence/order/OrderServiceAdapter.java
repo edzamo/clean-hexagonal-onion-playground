@@ -1,5 +1,6 @@
 package com.ezamora.coffeeshop.infrastructure.adapter.out.persistence.order;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -7,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.ezamora.coffeeshop.application.out.OrderNotFound;
 import com.ezamora.coffeeshop.application.out.Orders;
-import com.ezamora.coffeeshop.domain.model.order.Order;
+import com.ezamora.coffeeshop.domain.order.Order;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderServiceAdapter implements Orders {
 
     private final OrderRepository orderRepository;
+    private final Clock clock;
 
     @Override
     public Order findOrderById(UUID orderId) throws OrderNotFound {
@@ -37,7 +39,7 @@ public class OrderServiceAdapter implements Orders {
             existing.setItems(newState.getItems());
             return existing;
         }).orElseGet(() -> {
-            newState.setOrderDate(LocalDateTime.now());
+            newState.setOrderDate(LocalDateTime.now(clock));
             return newState;
         });
 

@@ -1,13 +1,13 @@
-package com.ezamora.coffeeshop.domain.model.order;
+package com.ezamora.coffeeshop.domain.order;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import com.ezamora.coffeeshop.domain.model.enums.Location;
-import com.ezamora.coffeeshop.domain.model.enums.Status;
-import com.ezamora.coffeeshop.domain.model.exception.InvalidOrderException;
-import com.ezamora.coffeeshop.domain.model.exception.OrderStateException;
+import com.ezamora.coffeeshop.domain.enums.Location;
+import com.ezamora.coffeeshop.domain.enums.Status;
+import com.ezamora.coffeeshop.domain.exception.InvalidOrderException;
+import com.ezamora.coffeeshop.domain.exception.OrderStateException;
 
 /** Pedido inmutable: cada transición devuelve un nuevo {@code Order}. */
 public final class Order {
@@ -68,7 +68,7 @@ public final class Order {
     }
 
     public BigDecimal getCost() {
-        return items.stream().map(LineItem::getCost).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
+        return items.stream().map(LineItem::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /** Sustituye ubicación e ítems; solo mientras se espera el pago. */

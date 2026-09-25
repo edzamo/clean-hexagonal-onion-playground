@@ -35,9 +35,13 @@ class ApplicationStartupTest {
     }
 
     @Test
-    void useCasesRunInsideATransactionalProxy() {
+    void orderingCoffeeIsTransactionalProxyBecauseOfPayOrder() {
         assertThat(AopUtils.isAopProxy(context.getBean(OrderingCoffee.class))).isTrue();
-        assertThat(AopUtils.isAopProxy(context.getBean(PreparingCoffee.class))).isTrue();
+    }
+
+    @Test
+    void preparingCoffeeIsAPlainBean() {
+        assertThat(AopUtils.isAopProxy(context.getBean(PreparingCoffee.class))).isFalse();
     }
 
     @Test

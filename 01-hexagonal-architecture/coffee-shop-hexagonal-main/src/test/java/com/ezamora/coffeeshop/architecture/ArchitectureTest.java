@@ -50,12 +50,26 @@ class ArchitectureTest {
             .resideInAPackage(BASE + ".application..")
             .should().dependOnClassesThat().resideInAnyPackage("jakarta..", "lombok..", "org.slf4j..");
 
-    /** INV-18: los casos de uso definen su unidad de trabajo con @Transactional. */
+    /** INV-18: solo el flujo que escribe en más de un puerto de salida define su unidad de trabajo. */
     @ArchTest
-    static final ArchRule use_cases_are_transactional = classes().that()
-            .resideInAPackage(BASE + ".application.service..").and().arePublic()
-            .and().implement(JavaClass.Predicates.resideInAPackage(BASE + ".application.in.."))
+    static final ArchRule use_cases_have_no_class_level_transactional = noClasses().that()
+            .resideInAPackage(BASE + ".application.service..")
             .should().beAnnotatedWith(Transactional.class);
+
+    @ArchTest
+    static final ArchRule pay_order_is_transactional = methods().that()
+            .areDeclaredIn(BASE + ".application.service.CoffeeShop").and().haveName("payOrder")
+            .should().beAnnotatedWith(Transactional.class);
+
+    /**
+     * Lista permitida de métodos transaccionales: los que escriben en más de un puerto.
+     * payOrder guarda el pago (Payments) y la orden pagada (Orders) y no debe dejar estado parcial.
+     */
+    @ArchTest
+    static final ArchRule only_multi_port_writers_are_transactional = methods().that()
+            .areDeclaredInClassesThat().resideInAPackage(BASE + ".application.service..")
+            .and().areAnnotatedWith(Transactional.class)
+            .should().haveName("payOrder");
 
     @ArchTest
     static final ArchRule use_cases_are_services = classes().that()
@@ -65,8 +79,7 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule config_does_not_wire_use_cases = noClasses().that()
             .resideInAPackage(BASE + ".infrastructure.config..")
-            .should().haveSimpleName("BeanConfig")
-            .orShould(new ArchCondition<JavaClass>("declare @Bean methods returning use cases") {
+            .should(new ArchCondition<JavaClass>("declare @Bean methods returning use cases") {
                 @Override
                 public void check(JavaClass item, ConditionEvents events) {
                     item.getMethods().stream()
@@ -77,25 +90,14 @@ class ArchitectureTest {
             });
 
     @ArchTest
-    static final ArchRule read_use_cases_are_read_only = methods().that()
-            .areDeclaredInClassesThat().resideInAPackage(BASE + ".application.service..")
-            .and().haveNameMatching("findOrderById|readReceipt")
-            .should(new ArchCondition<JavaMethod>("be annotated with @Transactional(readOnly = true)") {
-                @Override
-                public void check(JavaMethod method, ConditionEvents events) {
-                    boolean ok = method.isAnnotatedWith(Transactional.class)
-                            && method.getAnnotationOfType(Transactional.class).readOnly();
-                    if (!ok) {
-                        events.add(SimpleConditionEvent.violated(method, method.getFullName()
-                                + " must be @Transactional(readOnly = true)"));
-                    }
-                }
-            });
+    static final ArchRule config_does_not_implement_input_ports = noClasses().that()
+            .resideInAPackage(BASE + ".infrastructure.config..")
+            .should().implement(JavaClass.Predicates.resideInAPackage(BASE + ".application.in.."));
 
     @ArchTest
-    static final ArchRule no_transactional_decorators_in_config = noClasses().that()
-            .resideInAPackage(BASE + ".infrastructure.config..")
-            .should().haveSimpleNameStartingWith("Transactional");
+    static final ArchRule domain_has_no_model_subpackage = noClasses().should()
+            .resideInAPackage(BASE + ".domain.model..")
+            .because("el dominio se organiza por agregado/concepto, sin nivel 'model'");
 
     @ArchTest
     static final ArchRule inner_layers_do_not_depend_on_infrastructure = noClasses().that()
@@ -112,6 +114,11 @@ class ArchitectureTest {
             .should().dependOnClassesThat().resideInAPackage(BASE + ".infrastructure.adapter.out..");
 
     private static final String PERSISTENCE = BASE + ".infrastructure.adapter.out.persistence";
+
+    @ArchTest
+    static final ArchRule adapters_out_do_not_depend_on_adapters_in = noClasses().that()
+            .resideInAPackage(BASE + ".infrastructure.adapter.out..")
+            .should().dependOnClassesThat().resideInAPackage(BASE + ".infrastructure.adapter.in..");
 
     @ArchTest
     static final ArchRule persistence_order_does_not_depend_on_payment = noClasses().that()

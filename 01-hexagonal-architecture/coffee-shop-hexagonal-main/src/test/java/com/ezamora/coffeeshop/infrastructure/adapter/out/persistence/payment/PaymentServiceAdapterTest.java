@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.ezamora.coffeeshop.application.out.Payments;
 import com.ezamora.coffeeshop.contract.PaymentsContract;
-import com.ezamora.coffeeshop.domain.model.payment.Payment;
+import com.ezamora.coffeeshop.domain.payment.Payment;
 
 /** Contrato del puerto {@code Payments} (heredado) más las garantías propias de JPA, con H2. */
 @DataJpaTest

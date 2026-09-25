@@ -6,7 +6,7 @@ info:
     Esta API permite crear, actualizar, consultar y cancelar pedidos.
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:9000
     description: Servidor de desarrollo
 tags:
   - name: Orders
@@ -67,7 +67,7 @@ paths:
                 $ref: '#/components/schemas/OrderResponse'
         '404':
           description: Pedido no encontrado
-    post:
+    put:
       tags:
         - Orders
       summary: Actualizar un pedido existente
